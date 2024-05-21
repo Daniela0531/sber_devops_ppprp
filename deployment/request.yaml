@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: persistent-claim2
+  labels:
+    app: requests
+spec:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  volumeName: persistent-volume2
+  resources:
+    requests:
+      storage: 256Mi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: requests
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: requests
+        spec:
+          containers:
+            - name: requests
+              image: requester:latest
+              imagePullPolicy: Never
+              volumeMounts:
+                - name: persistent-storage
+                  mountPath: /data
+          volumes:
+            - name: persistent-storage
+              persistentVolumeClaim:
+                claimName: persistent-claim2
+          restartPolicy: OnFailure
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: persistent-volume2
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 512Mi
+  hostPath:
+    path: /pv/data

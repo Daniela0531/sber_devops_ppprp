@@ -1,3 +1,8 @@
 # sber_devops
+### для запуска:
 minikube start  
-# sber_devops_ppprp
+bash main.sh
+
+### для проверки работы:
+minikube service app
+
